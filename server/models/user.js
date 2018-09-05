@@ -55,7 +55,7 @@ UserSchema.methods.generateAuthToken = function() {
 
 UserSchema.statics.findByToken = function (token){ //statics is similar to .methods except everything added to it becomes a model method instead of an instance method. i.e  similar to User.find() rather than user.save()
   var User = this;
-  var decoded; // we make this undefined as if anything goes wronf in jwt.verify it will throw an error therefore we want to wrap it in a try catch block
+  var decoded; // we make this undefined because if anything goes wrong in jwt.verify it will throw an error therefore we want to wrap it in a try catch block
 
   try {
     decoded = jwt.verify(token, 'abc123');
@@ -72,6 +72,26 @@ UserSchema.statics.findByToken = function (token){ //statics is similar to .meth
     'tokens.access': 'auth'
   });
 };
+
+UserSchema.statics.findByCredentials = function (email, password){
+  var User = this
+  return User.findOne({email}).then((user) => {
+    if(!user){
+      return Promise.reject();
+    }
+
+    return new Promise((resolve, reject) => {
+      bcrypt.compare(password, user.password, (err, res) => { //res is a boolean
+        if(res){
+          resolve(user);
+        } else {
+          reject();
+        }
+      });
+    });
+  });
+};
+
 
 UserSchema.pre('save', function (next) {
   var user = this;

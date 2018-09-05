@@ -116,6 +116,20 @@ app.patch('/todos/:id', (req, res) => {
     res.send(req.user);
   });
 
+  //POST /users/login {email, password}
+  //make a post request and send email and pass then find a user with email matching and hash pass matching using bcrypt.compare()
+  app.post('/users/login', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password']);
+
+    User.findByCredentials(body.email, body.password).then((user) => {
+      return user.generateAuthToken().then((token) => { // this is returned so that the errors will be caught in the .catch
+        res.header('x-auth', token).send(user);
+      });
+    }).catch((e) => {
+      res.status(400).send();
+    });
+  });
+
 app.listen(port, () =>{
   console.log(`Starting on port ${port}`);
 });
