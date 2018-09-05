@@ -99,6 +99,19 @@ app.patch('/todos/:id', (req, res) => {
   });
 });
 
+  app.post('/users', (req, res)=> {
+    var user = new User(_.pick(req.body, ['email', 'password']));
+
+     user.save().then(() => {
+       return user.generateAuthToken();
+     }).then((token) => { //chaining onto the promise returned by generateAuthToken()
+       res.header('x-auth', token).send(user);//this is responding with the user var defined above which was edited in user.js by using the var user = this
+                                              //header(headerName, value) when starting a header with 'x-' you are making a custom header
+     }).catch((e) => {
+       res.status(400).send(e);
+     });
+  });
+
 app.listen(port, () =>{
   console.log(`Starting on port ${port}`);
 });
