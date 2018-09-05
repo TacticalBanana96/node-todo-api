@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 var UserSchema = new mongoose.Schema({
   email: {
@@ -71,6 +72,21 @@ UserSchema.statics.findByToken = function (token){ //statics is similar to .meth
     'tokens.access': 'auth'
   });
 };
+
+UserSchema.pre('save', function (next) {
+  var user = this;
+
+  if (user.isModified('password')){ // Make sure that the password is only hashed if it was just modified. If it wasn't and we hash our already hashed password that can cause it to break
+   bcrypt.genSalt(10, (err, salt) => { //genSalt(numOfRounds, callback)
+    bcrypt.hash(user.password, salt, (err, hash)=>{
+      user.password = hash;
+      next();
+     });
+   });
+} else {
+  next();
+}
+});
 
 var User = mongoose.model('User', UserSchema);
 
