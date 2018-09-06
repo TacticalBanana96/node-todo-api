@@ -53,6 +53,19 @@ UserSchema.methods.generateAuthToken = function() {
   });
 };
 
+UserSchema.methods.removeToken = function(token) {
+ //$pull is a mongoDb operator that allows you to remove objects from an array that match certain criteria
+
+var user = this;
+
+  return user.update({
+    $pull:{
+      tokens: {token} // es6 token:token
+    }
+  });
+
+};
+
 UserSchema.statics.findByToken = function (token){ //statics is similar to .methods except everything added to it becomes a model method instead of an instance method. i.e  similar to User.find() rather than user.save()
   var User = this;
   var decoded; // we make this undefined because if anything goes wrong in jwt.verify it will throw an error therefore we want to wrap it in a try catch block
