@@ -44,7 +44,7 @@ UserSchema.methods.toJSON = function(){
 UserSchema.methods.generateAuthToken = function() {
   var user = this;
   var access = 'auth';
-  var token  = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
+  var token  = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
 
   // user.tokens.push({access, tokens}); //due to inconsistencies across mongoDb versions this can cause errors
   user.tokens = user.tokens.concat([{access, token}]); // this works across a wider range of mongo versions
@@ -71,7 +71,7 @@ UserSchema.statics.findByToken = function (token){ //statics is similar to .meth
   var decoded; // we make this undefined because if anything goes wrong in jwt.verify it will throw an error therefore we want to wrap it in a try catch block
 
   try {
-    decoded = jwt.verify(token, 'abc123');
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
   } catch (e) {
     // return new Promise((resolve, reject) => {
     //   reject();
